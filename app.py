@@ -116,39 +116,19 @@ def click_healthy_habits():
 
         try:
             print('Habit: {}'.format(habit_title))
-            hover = ActionChains(driver).move_to_element(habit)
-            print('  Hovering...')
+            hover = ActionChains(driver)
+            hover.move_to_element(habit)
+            hover.pause(1)
+            hover.move_to_element(habit.find_element_by_class_name('yes-btn'))
+            hover.pause(1)
+            hover.click()
+
             hover.perform()
-            print('  Hovered')
+            print('Habit clicked')
+            habits_confirmed += 1
         except WebDriverException as webDriverException:
-            print('Unable to hover on habit, skipping...')
+            print('Unable to perform action chain on habit successfully')
             print(webDriverException)
-            continue
-
-        #TODO: Only click 'yes' when button has not been clicked yet.
-        try:
-            print('  Looking for "yes" button')
-            habit_yes_btn = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.CLASS_NAME, 'yes-btn'))
-            )
-            print('  Found')
-
-        except WebDriverException as webDriverException:
-            print('Unable to find "yes" button on habit, skipping...')
-            print(webDriverException)
-            continue
-
-        try:
-            print('  Clicking yes button...')
-            habit_yes_btn.click()
-            print('  Clicked. Sleeping 0.5sec')
-            time.sleep(0.5)
-        except WebDriverException as webDriverException:
-            print('Unable to click "yes" button on habit, skipping...')
-            print(webDriverException)
-            continue
-
-        habits_confirmed += 1
 
 
 def login(username, password):
@@ -187,7 +167,7 @@ def main():
     login(secrets.VIRGIN_PULSE_EMAIL, secrets.VIRGIN_PULSE_PASSWORD)
     wait_for_homepage_load()
     click_daily_cards()
-    wait_for_homepage_load()
+    time.sleep(2)
     click_healthy_habits()
     print('CLOSING IN 10 SECONDS...')
     time.sleep(10)
