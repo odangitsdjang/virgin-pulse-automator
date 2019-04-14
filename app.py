@@ -14,7 +14,7 @@ chrome_options.add_argument("--incognito")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--headless")
 driver = webdriver.Chrome(options=chrome_options)
-
+print('Driver UP')
 
 def is_home_page_loaded(driver):
     tips = driver.find_elements_by_class_name("dialy-tips-wrapper")
@@ -25,7 +25,7 @@ def wait_for_homepage_load():
     WebDriverWait(driver, 10).until(
         is_home_page_loaded
     )
-    print('--Home page loaded--')
+    print('Home page loaded')
 
 def click_daily_cards():
     print('---Daily Cards---')
@@ -104,7 +104,7 @@ def click_healthy_habits():
     print('Found {} habits on screen'.format(len(healthy_habits)))
     habits_confirmed = 0
     for habit in healthy_habits:
-        if habits_confirmed >= 3:
+        if habits_confirmed >= 6:
             break
 
         try:
@@ -125,6 +125,7 @@ def click_healthy_habits():
             print(webDriverException)
             continue
 
+        #TODO: Only click 'yes' when button has not been clicked yet.
         try:
             print('  Looking for "yes" button')
             habit_yes_btn = WebDriverWait(driver, 5).until(
@@ -140,7 +141,8 @@ def click_healthy_habits():
         try:
             print('  Clicking yes button...')
             habit_yes_btn.click()
-            print('  Clicked.')
+            print('  Clicked. Sleeping 0.5sec')
+            time.sleep(0.5)
         except WebDriverException as webDriverException:
             print('Unable to click "yes" button on habit, skipping...')
             print(webDriverException)
@@ -150,8 +152,10 @@ def click_healthy_habits():
 
 
 def login(username, password):
+    print('--Login--')
+    print('Waiting for login form')
     try:
-        username_input = WebDriverWait(driver, 15).until(
+        username_input = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, "username"))
         )
     except TimeoutException:
@@ -161,21 +165,25 @@ def login(username, password):
         print('Selenium encountered an error')
         raise
 
+    print('Login form loaded.')
+    print('Entering credentials...')
     username_input.clear()
     username_input.send_keys(username)
     password_input = driver.find_element_by_id("password")
     password_input.clear()
     password_input.send_keys(password)
-
+    print('Entered.')
+    print('Signing in...')
     sign_in = driver.find_element_by_id("kc-login")
     sign_in.click()
-
-
+    print('Sign in clicked')
 
 
 # MAIN SCRIPT
 def main():
+    print('Fetching virgin pulse login page...')
     driver.get("https://app.member.virginpulse.com/#/home")
+    print('Fetched.')
     login(secrets.VIRGIN_PULSE_EMAIL, secrets.VIRGIN_PULSE_PASSWORD)
     wait_for_homepage_load()
     click_daily_cards()
