@@ -1,0 +1,6 @@
+version: "3"
+services:
+  vp-auto:
+    build: .
+    env_file:
+      - secrets.env

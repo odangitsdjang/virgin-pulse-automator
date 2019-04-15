@@ -1,20 +1,20 @@
 import time
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
-import secrets
+VIRGIN_PULSE_EMAIL = os.environ['VIRGIN_PULSE_EMAIL']
+VIRGIN_PULSE_PASSWORD = os.environ['VIRGIN_PULSE_PASSWORD']
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--incognito")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(options=chrome_options)
-print('Driver UP')
+chrome_options.add_argument("--window-size=800,600")
 
 def is_home_page_loaded(driver):
     tips = driver.find_elements_by_class_name("dialy-tips-wrapper")
@@ -22,7 +22,7 @@ def is_home_page_loaded(driver):
 
 def wait_for_homepage_load():
     print('--Wait for Home to Load---')
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 30).until(
         is_home_page_loaded
     )
     print('Home page loaded')
@@ -133,7 +133,9 @@ def click_healthy_habits():
 
 def login(username, password):
     print('--Login--')
+    print('User: {} Pass Length: {}'.format(username, len(password)))
     print('Waiting for login form')
+
     try:
         username_input = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, "username"))
@@ -164,7 +166,7 @@ def main():
     print('Fetching virgin pulse login page...')
     driver.get("https://app.member.virginpulse.com/#/home")
     print('Fetched.')
-    login(secrets.VIRGIN_PULSE_EMAIL, secrets.VIRGIN_PULSE_PASSWORD)
+    login(VIRGIN_PULSE_EMAIL, VIRGIN_PULSE_PASSWORD)
     wait_for_homepage_load()
     click_daily_cards()
     time.sleep(2)
@@ -174,4 +176,21 @@ def main():
     driver.close()
 
 if __name__ == "__main__":
-    main()
+    retry_limit = 3
+    attempts = 1
+    while attempts <= retry_limit:
+        print('Attempt #{}'.format(attempts))
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+            print('Driver UP')
+            main()
+            break
+        except WebDriverException as webDriverException:
+            driver.close()
+            attempts += 1
+            print(webDriverException)
+            if attempts > retry_limit:
+                raise webDriverException
+            else:
+                print('MAIN: Web driver exception occurred. Trying again...')
+    print('Success!')
