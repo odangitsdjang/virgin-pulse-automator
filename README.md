@@ -37,20 +37,23 @@ have my development environment match my production/cloud environment as closely
 * Docker - Container
 
 ## Implementation Roadmap
-MVP
-1. Set up: Docker environment with Python3 and Selenium
-1. Log into virgin pulse via script
-1. Automate "daily card" clicks
-1. Set up a daily cronjob
-1. Deploy to server
-1. Hardening
+1. [X] Locally working proof of concept: Sign in and click cards
+1. [X] Docker container
+1. [X] Automate more things
+1. [X] Hardening
+1. [ ] Deploy to AWS ECS 
+1. [ ] Report generation
 
-Beyond MVP:
-1. Automate more things:
-    * "Healthy habits" points
-    * Sleep Tracker
-    * More?
-2. Email Reports
 
 ## Setup
-WIP
+### Running Locally outside of Docker
+1. create `secrets.env` to store your login credentials. See `example_secrets.env` for the format.
+1. Create a virtual environment
+1. `pip install -r requirements.txt`
+1. Activate the virtual environment `source VIRTUAL_ENV_FOLDER/bin/activate`
+1. Run the script `./run_local.sh`
+
+### Running Locally with Docker
+1. create `secrets.env` to store your login credentials. See `example_secrets.env` for the format.
+1. Build and run the application with `./run_docker.sh`
+    1. To skip building and just run, use `docker-compose up`
