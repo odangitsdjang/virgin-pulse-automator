@@ -1,5 +1,6 @@
 import time
 import os
+import urllib3
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -158,7 +159,13 @@ def login(username, password):
     print('Signing in...')
     sign_in = driver.find_element_by_id("kc-login")
     sign_in.click()
-    print('Sign in clicked')
+    print('Sign in clicked.')
+    try:
+        wait_for_homepage_load()
+    except WebDriverException as webDriverException:
+        print(webDriverException)
+        print('Did login fail?')
+        raise webDriverException
 
 
 # MAIN SCRIPT
@@ -167,7 +174,6 @@ def main():
     driver.get("https://app.member.virginpulse.com/#/home")
     print('Fetched.')
     login(VIRGIN_PULSE_EMAIL, VIRGIN_PULSE_PASSWORD)
-    wait_for_homepage_load()
     click_daily_cards()
     time.sleep(2)
     click_healthy_habits()
@@ -180,11 +186,19 @@ if __name__ == "__main__":
     attempts = 1
     while attempts <= retry_limit:
         print('Attempt #{}'.format(attempts))
+
         try:
             driver = webdriver.Chrome(options=chrome_options)
             print('Driver UP')
             main()
             break
+        except urllib3.exceptions.ProtocolError as urlLibException:
+            attempts+= 1
+            print(urlLibException)
+            if attempts > retry_limit:
+                raise urlLibException
+            else:
+                print('MAIN: Urllib ProtocolError exception occurred. Trying again...')
         except WebDriverException as webDriverException:
             driver.close()
             attempts += 1
