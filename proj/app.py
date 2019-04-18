@@ -8,8 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
-VIRGIN_PULSE_EMAIL = os.environ['VIRGIN_PULSE_EMAIL']
-VIRGIN_PULSE_PASSWORD = os.environ['VIRGIN_PULSE_PASSWORD']
+try:
+    VIRGIN_PULSE_EMAIL = os.environ['VIRGIN_PULSE_EMAIL']
+    VIRGIN_PULSE_PASSWORD = os.environ['VIRGIN_PULSE_PASSWORD']
+except KeyError as keyError:
+    print('KeyError occurred while trying to access environment variables. If on local, did you run source ./set_env_secrets.sh?')
+    raise keyError
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--incognito")
@@ -159,9 +163,21 @@ def login(username, password):
     print('Signing in...')
     sign_in = driver.find_element_by_id("kc-login")
     sign_in.click()
-    print('Sign in clicked.')
+    print('Sign in clicked. Wait 10s to see if login successful...')
+    try:
+        login_failed_alert = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
+        )
+        if login_failed_alert:
+            print('Login failed')
+            print('Closing driver...')
+            driver.close()
+            raise Exception('Login to Virgin Pulse failed')
+    except TimeoutException:
+        pass
     try:
         wait_for_homepage_load()
+        print('Login success')
     except WebDriverException as webDriverException:
         print(webDriverException)
         print('Did login fail?')

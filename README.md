@@ -51,6 +51,7 @@ have my development environment match my production/cloud environment as closely
 1. Create a virtual environment
 1. `pip install -r requirements.txt`
 1. Activate the virtual environment `source VIRTUAL_ENV_FOLDER/bin/activate`
+1. Set environment variables using `source ./set_env_secrets.sh`
 1. Run the script `./run_local.sh`
 
 ### Running Locally with Docker

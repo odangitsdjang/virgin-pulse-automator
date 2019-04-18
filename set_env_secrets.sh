@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-export $(grep -v '^#' secrets.env | xargs)
+# Run me as 'source ./set_env_secrets.sh'
+export $(grep -v '^#' secrets.env)
