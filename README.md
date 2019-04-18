@@ -41,17 +41,17 @@ have my development environment match my production/cloud environment as closely
 1. [X] Docker container
 1. [X] Automate more things
 1. [X] Hardening
-1. [ ] Deploy to AWS ECS 
+1. [X] Deploy to AWS ECS 
 1. [ ] Report generation
 
 
 ## Setup
-### Running Locally outside of Docker
+### Running Locally with virtual env
 1. create `secrets.env` to store your login credentials. See `example_secrets.env` for the format.
-1. Create a virtual environment
+1. Create a virtual environment (see virtualenv documentation [here](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/#creating-a-virtualenv))
 1. `pip install -r requirements.txt`
 1. Activate the virtual environment `source VIRTUAL_ENV_FOLDER/bin/activate`
-1. Set environment variables using `source ./set_env_secrets.sh`
+1. Set environment variables using `source ./set_env.sh`
 1. Run the script `./run_local.sh`
 
 ### Running Locally with Docker
