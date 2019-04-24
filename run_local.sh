@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-./set_env_secrets.sh
+source ./set_env.sh
 python3 proj/app.py

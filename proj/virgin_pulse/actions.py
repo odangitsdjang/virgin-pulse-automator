@@ -14,10 +14,24 @@ def is_home_page_loaded(driver):
 
 def wait_for_homepage_load(driver):
     print('--Wait for Home to Load---')
+    print('Waiting up to 30s for daily tips menu to load...')
     WebDriverWait(driver, 30).until(
         is_home_page_loaded
     )
-    print('Home page loaded')
+    print('Loaded.')
+
+    print('Waiting up to 10s for trophy modal to appear...')
+    try:
+        trophy_modal_close_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "trophy-modal-close-btn"))
+        )
+        print('Trophy modal found. Clicking...')
+        trophy_modal_close_button.click()
+        print('Clicked.')
+    except TimeoutException:
+        print('No trophy modal found. Skipping.')
+
+    print('Home page loaded.')
 
 def click_daily_cards(driver):
     print('---Daily Cards---')
@@ -163,7 +177,7 @@ def login(driver, username, password):
     except TimeoutException:
         pass
     try:
-        wait_for_homepage_load()
+        wait_for_homepage_load(driver)
         print('Login success')
     except WebDriverException as webDriverException:
         print(webDriverException)
