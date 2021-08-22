@@ -14,16 +14,16 @@ def is_home_page_loaded(driver):
     return len(tips) >= 4
 
 def wait_for_homepage_load(driver):
-    print('--Skip adding phone number--')
-    try:
-        skip_phone_number = WebDriverWait(driver, 10).until(
-            driver.find_elements_by_xpath("//*[contains(text(), 'Skip for now')]")
-        )
-        print('Skip phone number found. Skipping...')
-        skip_phone_number.click()
-        print('Skipped.')
-    except TimeoutException:
-        print('No daily close button found. Skipping.')
+#     print('--Skip adding phone number--')
+#     try:
+#         skip_phone_number = WebDriverWait(driver, 10).until(
+#             driver.find_elements_by_xpath("//*[contains(text(), 'Skip for now')]")
+#         )
+#         print('Skip phone number found. Skipping...')
+#         skip_phone_number.click()
+#         print('Skipped.')
+#     except TimeoutException:
+#         print('No daily close button found. Skipping.')
 
     print('--Wait for Home to Load---')
     print('Waiting up to 30s for daily tips menu to load...')
@@ -44,7 +44,7 @@ def wait_for_homepage_load(driver):
     print('Home page loaded.')
 
 def click_daily_popup(driver):
-    print('Getting rid of daily healthy popup...')
+    print('Getting rid of daily health popup...')
     time.sleep(30)
     try:
         daily_close_button = WebDriverWait(driver, 10).until(
@@ -70,22 +70,30 @@ def click_daily_cards(driver):
     else:
         print('Clicking button to display cards')
         daily_tips.click()
+    # Skip through until daily cards available
+    while (not is_daily_card_available(driver)):
+        click_next_button(driver)
 
-     # Click the first daily card
+    # Click the first daily card
     print('Get first daily card button')
-    got_it_button_one = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.ID, "triggerCloseCurtain"))
-    )
-    button_completed = 'completed-button' in got_it_button_one.get_attribute('class')
-    if button_completed:
-        print('Card 1: Already complete')
+    #     true false quiz
+    if (got_it_button_one := click_through_true_false_quiz(driver)):
+        print("")
     else:
-        print('Card 1: Clicking "GOT IT" button')
-        got_it_button_one.click()
+        got_it_button_one = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "triggerCloseCurtain"))
+        )
+        button_completed = 'completed-button' in got_it_button_one.get_attribute('class')
+        if button_completed:
+            print('Card 1: Already complete')
+        else:
+            print('Card 1: Clicking "GOT IT" button')
+            got_it_button_one.click()
 
     # Wait for Virgin Pulse to automatically present the next button
     print('Wait for Virgin Pulse to automatically present the next card')
     try:
+        click_through_true_false_quiz(driver)
         got_it_button_changed = WebDriverWait(driver, 5).until(
             EC.staleness_of(got_it_button_one)
         )
@@ -94,14 +102,8 @@ def click_daily_cards(driver):
     except TimeoutException:
         print('Timeout. Manually switching cards')
         # Button didn't change, go to the next/prev card manually
-        try:
-            print('Looking for "next" arrow button')
-            switch_card_button = driver.find_element_by_class_name('next-card-btn')
-        except NoSuchElementException:
-            print('"Next" not found. Looking for "Prev" arrow button')
-            switch_card_button = driver.find_element_by_class_name('prev-card-btn')
+        click_next_button(driver)
         print("Button to switch cards found. Clicking...")
-        switch_card_button.click()
 
     print('Second daily card button')
     got_it_button_two = WebDriverWait(driver, 10).until(
@@ -113,6 +115,46 @@ def click_daily_cards(driver):
     else:
         print('Card 2: Clicking "GOT IT" button')
         got_it_button_two.click()
+
+def click_next_button(driver):
+    try:
+        print('Looking for "next" arrow button')
+        switch_card_button = driver.find_element_by_class_name('next-card-btn')
+        print('Clicking "next" arrow button')
+        switch_card_button.click()
+    except NoSuchElementException:
+        print('"Next" not found. Looking for "Prev" arrow button')
+        switch_card_button = driver.find_element_by_class_name('prev-card-btn')
+
+def is_daily_card_available(driver):
+    try:
+        # TODO: might need to adjust the xpath
+        daily_card_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@class='quiz-true-false-buttons']|//button[@id='triggerCloseCurtain']"))
+        )
+        return True
+    except TimeoutException:
+        print('Daily card buttons not found - Should skip to next card')
+
+def click_through_true_false_quiz(driver):
+    try:
+        true_false_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, "quiz-true-false-buttons"))
+        )
+        print('Found true false quiz, clicking button')
+        true_false_button.click()
+        print('Clicked')
+        print('Wait for Got It button')
+        got_it_core_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, "got-it-core-button"))
+        )
+        print('Click Got It button')
+        got_it_core_button.click()
+        print('Clicked')
+        return got_it_core_button
+    except TimeoutException:
+        print('True false quiz not found, skipping')
+
 
 def click_healthy_habits(driver):
     print('---Healthy Habits---')
@@ -138,7 +180,7 @@ def click_healthy_habits(driver):
             break
 
         try:
-            habit_title = habit.find_element_by_tag_name('h2').text
+            habit_title = habit.find_element_by_class_name('home-healthy-habit-title').text
         except WebDriverException as webDriverException:
             print('Unable to find habit title, skipping...')
             print(webDriverException)

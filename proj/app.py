@@ -45,8 +45,8 @@ def main():
     print('Log in Page.')
     step = 'LOGIN'
     virgin_pulse.actions.login(driver, VIRGIN_PULSE_EMAIL, VIRGIN_PULSE_PASSWORD)
-    step = 'CLOSE_POPUP'
-    virgin_pulse.actions.click_daily_popup(driver)
+#     step = 'CLOSE_POPUP'
+#     virgin_pulse.actions.click_daily_popup(driver)
     step = 'DAILY CARDS'
     virgin_pulse.actions.click_daily_cards(driver)
     step = 'HEALTHY_HABITS'
